@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deforestation Detection</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+
+        #uploadForm {
+            margin-bottom: 20px;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+
+        #uploadedImage {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        #error-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Deforestation Detection</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="image" id="imageInput">
+        <button type="button" id="uploadButton">Upload</button>
+    </form>
+    <div id="result" style="display:none;">
+        <h2>Prediction:</h2>
+        <p id="predictionText"></p>
+        <img id="uploadedImage" src="" alt="Uploaded Image" style="max-width: 400px;">
+    </div>
+        <div id="error-message"></div>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadButton = document.getElementById('uploadButton');
+        const resultDiv = document.getElementById('result');
+        const predictionText = document.getElementById('predictionText');
+        const uploadedImage = document.getElementById('uploadedImage');
+        const errorMessage = document.getElementById('error-message');
+
+        uploadButton.addEventListener('click', () => {
+             const fileInput = document.getElementById('imageInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                errorMessage.textContent = "Please select an image.";
+                return;
+            } else {
+                errorMessage.textContent = ""; // Clear any previous errors
+            }
+
+            const formData = new FormData(uploadForm);
+
+            fetch('/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    errorMessage.textContent = data.error;
+                    resultDiv.style.display = 'none';
+                    return;
+                }
+
+                predictionText.textContent = data.prediction;
+                uploadedImage.src = `data:image/jpeg;base64,${data.image}`;
+                resultDiv.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                 errorMessage.textContent = "An error occurred. Please try again.";
+                resultDiv.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
